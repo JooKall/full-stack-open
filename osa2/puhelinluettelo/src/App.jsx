@@ -1,19 +1,25 @@
-import { useState } from 'react'
+//TODO: Poiston suorittaminen voidaan varmistaa käyttäjältä window.confirm-metodilla
+
+import { useState, useEffect } from 'react'
+import personService from './services/persons'
 import PersonForm from './components/Personform'
 import Filter from './components/Filter'
 import Persons from './components/Persons'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ])
-
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('');
   const [filter, setFilter] = useState('');
+
+  useEffect(() => {
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
+      })
+  }, [])
+
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -24,9 +30,13 @@ const App = () => {
         name: newName,
         number: newNumber
       }
-      setPersons(persons.concat(person))
-      setNewName('')
-      setNewNumber('')
+      personService
+        .create(person)
+        .then(returnedPerson => {
+          setPersons(persons.concat(returnedPerson))
+          setNewName('')
+          setNewNumber('')
+        })
     }
   }
 
@@ -46,6 +56,14 @@ const App = () => {
     person.name.toLowerCase().includes(filter.toLowerCase())
   )
 
+  const removePerson = (id) => {
+    personService
+      .remove(id)
+      .then(() => {
+        setPersons(persons.filter(person => person.id !== id));
+      })
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -59,7 +77,7 @@ const App = () => {
         addPerson={addPerson}
       />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} removePerson={removePerson} />
     </div>
   )
 
