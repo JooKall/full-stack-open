@@ -23,8 +23,21 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+    const existingPerson = persons.find(person => person.name === newName)
+
+    if (existingPerson) {
+      if (window.confirm(`${existingPerson.name} is already added to phonebook, replace the old number with a new one?`)) {
+        const updatedPerson = { ...existingPerson, number: newNumber }
+        personService
+          .update(updatedPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(persons.map(person => person.id !== existingPerson.id ? person : returnedPerson))
+          })
+          .catch(error => {
+            alert(`${newName} was already deleted from server`)
+            setPersons(persons.filter(person => person.id !== existingPerson.id))
+          })
+      }
     } else {
       const person = {
         name: newName,
@@ -34,10 +47,10 @@ const App = () => {
         .create(person)
         .then(returnedPerson => {
           setPersons(persons.concat(returnedPerson))
-          setNewName('')
-          setNewNumber('')
         })
     }
+    setNewName('')
+    setNewNumber('')
   }
 
   const handleNameChange = (event) => {
@@ -56,20 +69,28 @@ const App = () => {
     person.name.toLowerCase().includes(filter.toLowerCase())
   )
 
-  const removePerson = (id) => {
-    personService
-      .remove(id)
-      .then(() => {
-        setPersons(persons.filter(person => person.id !== id));
-      })
+  const removePerson = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter(person => person.id !== id));
+        })
+        .catch(error => {
+          console.log(`Error while deleting ${name}`)
+          alert(
+            `Error while deleting ${name}`
+          )
+        })
+    }
   }
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter filter={filter} handleFilter={handleFilterChange}/>
+      <Filter filter={filter} handleFilter={handleFilterChange} />
       <h3>Add a new</h3>
-      <PersonForm 
+      <PersonForm
         newName={newName}
         newNumber={newNumber}
         handleNameChange={handleNameChange}
