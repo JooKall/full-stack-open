@@ -3,7 +3,7 @@ Content-Type: application/json
 
 {
   "title": "Testing",
-  "author": "JK",
+  "author": "John Doe",
   "url": "www.fullstackopen.com",
-  "likes": 2
+  "likes": 3
 }
