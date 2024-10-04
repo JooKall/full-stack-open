@@ -1,8 +1,9 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImprYSIsImlkIjoiNjZmZTc1ZDFiZDA3NzM5OTYyYjE3NWE5IiwiaWF0IjoxNzI3OTU2MjQwfQ.6aIcV5U2Qk7CnbUvzDJzkjidPrACdYbJlkmoQwnULCk
 
 {
-  "title": "Testing",
+  "title": "Testing Authorization 2",
   "author": "John Doe",
   "url": "www.fullstackopen.com",
   "likes": 3
