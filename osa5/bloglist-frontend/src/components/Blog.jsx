@@ -33,7 +33,7 @@ const Blog = ({ blog, updateBlog, removeBlog, username }) => {
   }
 
   return (
-    <div style={blogStyle}>
+    <div style={blogStyle} data-testid="blog">
       <div>
         <span>{blog.title}</span> <span>{blog.author}</span>
         {blogVisible ? (
