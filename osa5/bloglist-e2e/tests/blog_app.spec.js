@@ -99,7 +99,7 @@ describe('Blog app', () => {
           }
         })
         await loginWith(page, 'user', 'salainen')
-        await expect(page.getByText('User logged in')).toBeVisible()
+        await expect(page.getByText('user logged in')).toBeVisible()
 
         const blogText = await page.getByText('testTitle1 testAuthor1')
         await blogText.getByRole('button', { name: 'view' }).click()
