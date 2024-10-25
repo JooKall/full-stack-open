@@ -23,7 +23,6 @@ const useResource = (baseUrl) => {
     .get(baseUrl)
     .then(response => {
       setResources(response.data)
-      console.log('UseResource')
     })
   }, [baseUrl])
 
