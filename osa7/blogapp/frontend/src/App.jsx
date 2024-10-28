@@ -1,4 +1,4 @@
-import { useEffect, createRef } from 'react'
+import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotify } from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
@@ -6,10 +6,12 @@ import { useUserDispatch, useUserValue } from './UserContext'
 import blogService from './services/blogs'
 import storage from './services/storage'
 import Login from './components/Login'
-import Blog from './components/Blog'
 import NewBlog from './components/NewBlog'
 import Notification from './components/Notification'
-import Togglable from './components/Togglable'
+import Users from './components/Users'
+import User from './components/User'
+import BlogList from './components/Bloglist'
+import BlogDetails from './components/BlogDetails'
 
 import {
   Routes,
@@ -18,18 +20,26 @@ import {
   Navigate,
   useParams,
   useNavigate,
-  useMatch
-} from "react-router-dom"
+  useMatch,
+} from 'react-router-dom'
+
+const Home = ({ blogs }) => {
+  return (
+    <div>
+      <h1>Blog App</h1>
+      <NewBlog />
+      <BlogList blogs={blogs}/>
+    </div>
+  )
+}
 
 const App = () => {
-
   const queryClient = useQueryClient()
-  const blogFormRef = createRef()
-
   const userDispatch = useUserDispatch()
   const user = useUserValue()
 
   const notifyWith = useNotify()
+  const navigate = useNavigate()
 
   const updateBlogMutation = useMutation({
     mutationFn: blogService.update,
@@ -96,7 +106,10 @@ const App = () => {
       notifyWith({ message: `Bye, ${user.name}!` })
     } catch (error) {
       console.log(error)
-      notifyWith({ message: 'Something went wrong while logging out :(', type: 'error' })
+      notifyWith({
+        message: 'Something went wrong while logging out :(',
+        type: 'error',
+      })
     }
   }
 
@@ -108,6 +121,7 @@ const App = () => {
   const handleDelete = async (blog) => {
     if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
       deleteBlogMutation.mutate(blog.id)
+      navigate('/')
     }
   }
 
@@ -121,27 +135,40 @@ const App = () => {
     )
   }
 
-  const byLikes = (a, b) => b.likes - a.likes
+  const padding = {
+    paddingRight: 5,
+  }
 
   return (
-    <div>
-      <h2>blogs</h2>
-      <Notification />
-      <div>
-        {user.name} logged in
+    <div className="container">
+      <div style={{ marginBottom: '30px' }}>
+        <h2>blogs</h2>
+        <Notification />
+        <Link style={padding} to="/">
+          Blogs
+        </Link>
+        <Link style={padding} to="/users">
+          Users
+        </Link>
+        {user.name} logged in {' '}
         <button onClick={handleLogout}>logout</button>
       </div>
-      <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-        <NewBlog blogFormRef={blogFormRef} />
-      </Togglable>
-      {blogs.sort(byLikes).map((blog) => (
-        <Blog
-          key={blog.id}
-          blog={blog}
-          handleVote={handleVote}
-          handleDelete={handleDelete}
+
+      <Routes>
+        <Route path="/" element={<Home blogs={blogs} />} />
+        <Route path="/users" element={<Users />} />
+        <Route path="/users/:id" element={<User />} />
+        <Route
+          path="/blogs/:id"
+          element={
+            <BlogDetails
+              blogs={blogs}
+              handleVote={handleVote}
+              handleDelete={handleDelete}
+            />
+          }
         />
-      ))}
+      </Routes>
     </div>
   )
 }

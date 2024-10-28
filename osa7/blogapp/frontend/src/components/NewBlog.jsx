@@ -1,17 +1,20 @@
 /* eslint-disable react/prop-types */
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
 import { useNotify } from '../NotificationContext'
 
+import Togglable from './Togglable'
 import blogService from '../services/blogs'
 
-const NewBlog = ({ blogFormRef }) => {
+const NewBlog = () => {
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
   const [author, setAuthor] = useState('')
 
   const queryClient = useQueryClient()
   const notifyWith = useNotify()
+
+  const blogFormRef = useRef()
 
   const newBlogMutation = useMutation({
     mutationFn: blogService.create,
@@ -26,9 +29,10 @@ const NewBlog = ({ blogFormRef }) => {
     onError: (error) => {
       console.log(error.response.data.error)
       notifyWith({
-        message: `${error.response.data.error}`, type: 'error'
+        message: `${error.response.data.error}`,
+        type: 'error',
       })
-    }
+    },
   })
 
   const handleTitleChange = (event) => {
@@ -53,7 +57,7 @@ const NewBlog = ({ blogFormRef }) => {
   }
 
   return (
-    <div>
+    <Togglable buttonLabel="create new blog" ref={blogFormRef}>
       <h2>Create a New Blog</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -85,7 +89,7 @@ const NewBlog = ({ blogFormRef }) => {
         </div>
         <button type="submit">create</button>
       </form>
-    </div>
+    </Togglable>
   )
 }
 
