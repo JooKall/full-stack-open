@@ -37,13 +37,15 @@ h1 {
 }
 
 button {
+  margin: 2px;
   border-radius: 6px;
-  border: 1px solid transparent;
+  border: 1px solid;
   padding: 0.4em 0.8em;
   font-size: 0.9em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #3f3f3f;
+  background-color: rgb(241, 241, 241);
+  color: black;
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -68,13 +70,6 @@ button:focus-visible {
 
 .navigation-menu button {
   padding: 5px;
-}
-
-.container {
-  margin: 10px; /* Tämä lisää tilaa .containerin ympärille */
-  padding: 10px; /* Tämä lisää tilaa sisällä olevan sisällön ympärille */
-  display: flex; /* Jos käytät flexboxia, varmista, että se on tarpeen */
-  flex-direction: column; /* Aseta tarvittaessa */
 }
 
 @media (prefers-color-scheme: light) {

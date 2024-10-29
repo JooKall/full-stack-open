@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
 import { useNotify } from '../NotificationContext'
+import { Form, Button } from 'react-bootstrap'
 
 import Togglable from './Togglable'
 import blogService from '../services/blogs'
@@ -58,37 +59,39 @@ const NewBlog = () => {
 
   return (
     <Togglable buttonLabel="create new blog" ref={blogFormRef}>
-      <h2>Create a New Blog</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title:</label>
-          <input
+      <h3>Create a New Blog</h3>
+      <Form onSubmit={handleSubmit}>
+        <Form.Group>
+          <Form.Label>Title:</Form.Label>
+          <Form.Control
             type="text"
             data-testid="title"
             value={title}
             onChange={handleTitleChange}
           />
-        </div>
-        <div>
-          <label>URL:</label>
-          <input
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>URL:</Form.Label>
+          <Form.Control
             type="text"
             data-testid="url"
             value={url}
             onChange={handleUrlChange}
           />
-        </div>
-        <div>
-          <label>Author:</label>
-          <input
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>Author:</Form.Label>
+          <Form.Control
             type="text"
             data-testid="author"
             value={author}
             onChange={handleAuthorChange}
           />
-        </div>
-        <button type="submit">create</button>
-      </form>
+        </Form.Group>
+        <Button variant="dark" type="submit">
+          create
+        </Button>
+      </Form>
     </Togglable>
   )
 }

@@ -5,6 +5,7 @@ const Blog = ({ blog }) => {
 
   const style = {
     border: 'solid',
+    borderRadius: 6,
     padding: 10,
     borderWidth: 1,
     marginBottom: 5,

@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNotify } from './NotificationContext'
 import { useUserDispatch, useUserValue } from './UserContext'
+import { Button, Navbar, Nav } from 'react-bootstrap'
 
 import blogService from './services/blogs'
 import storage from './services/storage'
@@ -29,7 +30,7 @@ const Home = ({ blogs }) => {
 const Login = () => {
   return (
     <div>
-      <h2>blogs</h2>
+      <h2>Blog App</h2>
       <Notification />
       <LoginForm />
     </div>
@@ -85,17 +86,31 @@ const App = () => {
 
   return (
     <div className="container">
-      <div className="navigation-menu">
-        <Link to="/">
-          Blogs
-        </Link>
-        <Link to="/users">
-          Users
-        </Link>
-        {user.name} logged in <button onClick={handleLogout}>logout</button>
-      </div>
+      <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+        <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+        <Navbar.Collapse id="responsive-navbar-nav">
+          <Nav className="mr-auto">
+            <Nav.Link href="#" as="span">
+              <Link to="/">Blogs</Link>
+            </Nav.Link>
+            <Nav.Link href="#" as="span">
+              <Link to="/users">Users</Link>
+            </Nav.Link>
+          </Nav>
+          <div className="d-flex align-items-center">
+            <span style={{ color: 'white', marginRight: '10px' }}>
+              {user.name} logged in
+            </span>
+            <Button variant="outline-light" onClick={handleLogout}>
+              log out
+            </Button>
+          </div>
+        </Navbar.Collapse>
+      </Navbar>
 
-      <Notification />
+      <div style={{ marginTop: '20px' }}>
+        <Notification />
+      </div>
 
       <Routes>
         <Route path="/" element={<Home blogs={blogs} />} />

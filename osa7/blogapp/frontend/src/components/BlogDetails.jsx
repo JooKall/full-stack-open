@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNotify } from '../NotificationContext'
 import { useNavigate } from 'react-router-dom'
+import { Button } from 'react-bootstrap'
 
 import storage from '../services/storage'
 import CommentForm from './CommentForm'
@@ -73,28 +74,52 @@ const BlogDetails = ({ blogs }) => {
 
   return (
     <div>
-      <h2>
-        {blog.title} by {blog.author}
-      </h2>
       <div>
-        <a href={blog.url}>{blog.url}</a>
+        <h2>
+          {blog.title} by {blog.author}
+        </h2>
+        <div>
+          <a href={blog.url}>{blog.url}</a>
+        </div>
+        <div>
+          {blog.likes} likes
+          <Button
+            variant="dark"
+            style={{
+              fontSize: '1rem',
+              padding: '2px 5px',
+              lineHeight: '1',
+            }}
+            onClick={handleVote}
+          >
+            like
+          </Button>
+        </div>
+        <div>Added by {nameOfUser}</div>
+        {canRemove && (
+          <Button
+            variant="dark"
+            style={{
+              fontSize: '1rem',
+              padding: '2px 5px',
+              lineHeight: '1.5',
+            }}
+            onClick={handleDelete}
+          >
+            remove
+          </Button>
+        )}
       </div>
-      <div>
-        {blog.likes} likes
-        <button style={{ marginLeft: 3 }} onClick={handleVote}>
-          like
-        </button>
-      </div>
-      <div>Added by {nameOfUser}</div>
-      {canRemove && <button onClick={handleDelete}>remove</button>}
 
-      <h5 style={{ marginTop: 20 }}>Comments</h5>
-      <CommentForm id={blog.id} />
-      <ul>
-        {blog.comments.map((comment, index) => (
-          <li key={index}>{comment}</li>
-        ))}
-      </ul>
+      <div style={{ marginTop: 20 }}>
+        <h5>Comments</h5>
+        <CommentForm id={blog.id} />
+        <ul>
+          {blog.comments.map((comment, index) => (
+            <li key={index}>{comment}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   )
 }
