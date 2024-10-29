@@ -70,4 +70,32 @@ router.put('/:id', async (request, response) => {
   response.json(updatedBlog)
 })
 
+router.post('/:id/comments', async (request, response) => {
+  const comment = request.body.comment
+
+  if (!comment) {
+    return response.status(400).json({ error: 'Comment text missing' })
+  }
+
+  const blog = await Blog.findById(request.params.id)
+  if (!blog) {
+    return response.status(404).json({ error: 'Blog not found' })
+  }
+
+  blog.comments = blog.comments.concat(comment)
+  const updatedBlog = await blog.save()
+
+  response.status(201).json(updatedBlog)
+})
+
+router.get('/:id/comments', async (request, response) => {
+  const blog = await Blog.findById(request.params.id)
+
+  if (!blog) {
+    return response.status(404).json({ error: 'Blog not found' })
+  }
+
+  response.json(blog.comments || [])
+})
+
 module.exports = router

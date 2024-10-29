@@ -26,9 +26,9 @@ const Users = () => {
       <Table striped>
         <tbody>
           <tr>
-            <td>{}</td>
+            <td><strong>Username</strong></td>
             <td>
-              <span><strong>Blogs created</strong></span>
+              <strong>Blogs created</strong>
             </td>
           </tr>
           {users.map((user) => (
