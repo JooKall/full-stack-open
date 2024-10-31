@@ -17,7 +17,7 @@ const BirthYearForm = ({ authors }) => {
 
   const submit = async (event) => {
     event.preventDefault()
-    if (selectedOption) {
+    if (selectedOption && year) {
       changeBirthYear({
         variables: { name: selectedOption.value, year: Number(year) },
       })
