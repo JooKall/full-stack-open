@@ -4,11 +4,15 @@ import { useMutation } from '@apollo/client'
 
 import { EDIT_BIRTHYEAR } from '../queries'
 
-const BirthYearForm = ({ authors }) => {
+const BirthYearForm = ({ authors, setError }) => {
   const [year, setYear] = useState('')
   const [selectedOption, setSelectedOption] = useState(null)
 
-  const [changeBirthYear] = useMutation(EDIT_BIRTHYEAR)
+  const [changeBirthYear] = useMutation(EDIT_BIRTHYEAR, {
+    onError: (error) => {
+      setError(error.graphQLErrors[0].message)
+    },
+  })
 
   const options = authors.map((author) => ({
     value: author.name,

@@ -1,6 +1,7 @@
+/* eslint-disable react/prop-types */
 import { useState } from 'react'
 import { useMutation } from '@apollo/client'
-import { CREATE_BOOK, ALL_AUTHORS, ALL_BOOKS } from '../queries'
+import { CREATE_BOOK, ALL_AUTHORS, ALL_BOOKS, ALL_GENRES } from '../queries'
 
 const NewBook = (props) => {
   const [title, setTitle] = useState('')
@@ -10,7 +11,14 @@ const NewBook = (props) => {
   const [genres, setGenres] = useState([])
 
   const [createBook] = useMutation(CREATE_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    refetchQueries: [
+      { query: ALL_BOOKS, variables: { genre: null } },
+      { query: ALL_GENRES },
+      { query: ALL_AUTHORS },
+    ],
+    onError: (error) => {
+      props.setError(error.graphQLErrors[0].message)
+    },
   })
 
   if (!props.show) {
@@ -22,7 +30,7 @@ const NewBook = (props) => {
 
     console.log('add book...')
 
-    createBook({
+    await createBook({
       variables: { title, published: Number(published), author, genres },
     })
 
@@ -34,7 +42,9 @@ const NewBook = (props) => {
   }
 
   const addGenre = () => {
-    setGenres(genres.concat(genre))
+    if (genre && !genres.includes(genre)) {
+      setGenres(genres.concat(genre))
+    }
     setGenre('')
   }
 

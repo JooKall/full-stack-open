@@ -13,6 +13,10 @@ const Authors = (props) => {
     return <div>loading...</div>
   }
 
+  if (result.error) {
+    return <div>error loading authors</div>
+  }
+
   const authors = result.data.allAuthors
 
   return (
@@ -35,7 +39,7 @@ const Authors = (props) => {
         </tbody>
       </table>
       <div>
-        <BirthYearForm authors={authors} />
+        <BirthYearForm authors={authors} setError={props.setError}/>
       </div>
     </div>
   )

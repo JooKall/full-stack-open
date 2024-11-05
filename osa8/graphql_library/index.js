@@ -30,6 +30,7 @@ const typeDefs = `
     allBooks (author: String, genre: String): [Book!]!
     authorCount: Int!
     allAuthors: [Author!]!
+    allGenres: [String!]!
     me: User
   }
 
@@ -101,14 +102,19 @@ const resolvers = {
           })
         }
       }
+
       if (args.genre) {
         query.genres = { $in: [args.genre] }
       }
-
+      
       return Book.find(query).populate('author')
     },
     authorCount: async () => Author.collection.countDocuments(),
     allAuthors: async () => Author.find({}),
+    allGenres: async () => {
+      const uniqueGenres = await Book.distinct('genres')
+      return uniqueGenres
+    },
     me: (root, args, context) => {
       return context.currentUser
     },
@@ -122,7 +128,7 @@ const resolvers = {
     addBook: async (root, args, context) => {
       const currentUser = context.currentUser
       if (!currentUser) {
-        throw new GraphQLError('not authenticated', {
+        throw new GraphQLError('Not authenticated', {
           extensions: { code: 'BAD_USER_INPUT' },
         })
       }
@@ -187,7 +193,7 @@ const resolvers = {
     createUser: async (root, args) => {
       const user = new User({
         username: args.username,
-        favouriteGenre: args.favouriteGenre,
+        favoriteGenre: args.favoriteGenre,
       })
 
       return user.save().catch((error) => {
@@ -231,11 +237,8 @@ startStandaloneServer(server, {
   context: async ({ req, res }) => {
     const auth = req ? req.headers.authorization : null
     if (auth && auth.startsWith('Bearer ')) {
-      const decodedToken = jwt.verify(
-        auth.substring(7), process.env.JWT_SECRET
-      )
-      const currentUser = await User
-        .findById(decodedToken.id)
+      const decodedToken = jwt.verify(auth.substring(7), process.env.JWT_SECRET)
+      const currentUser = await User.findById(decodedToken.id)
       return { currentUser }
     }
   },
