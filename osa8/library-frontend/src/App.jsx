@@ -1,17 +1,88 @@
 import { useState, useEffect } from 'react'
-import { useApolloClient } from '@apollo/client'
+import { useApolloClient, useSubscription } from '@apollo/client'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Recommendations from './components/Recommendations'
 import Notify from './components/Notify'
+import { BOOK_ADDED, ALL_BOOKS, ALL_GENRES, ALL_AUTHORS } from './queries.js'
+
+export const updateCache = (cache, query, addedBook) => {
+  // helper that is used to eliminate saving same book twice
+  const uniqByName = (a) => {
+    let seen = new Set()
+    return a.filter((item) => {
+      let k = item.title
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+
+  cache.updateQuery(query, ({ allBooks }) => {
+    return { allBooks: uniqByName(allBooks.concat(addedBook)) }
+  })
+
+  addedBook.genres.forEach((genre) => {
+    cache.updateQuery({ query: ALL_BOOKS, variables: { genre } }, (data) => {
+      if (data && data.allBooks) {
+        return {
+          allBooks: uniqByName(data.allBooks.concat(addedBook)),
+        }
+      }
+      return {
+        allBooks: [addedBook],
+      }
+    })
+  })
+}
 
 const App = () => {
   const [token, setToken] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [page, setPage] = useState('authors')
   const client = useApolloClient()
+
+  useSubscription(BOOK_ADDED, {
+    onData: async ({ data }) => {
+      const addedBook = data.data.bookAdded
+      notify(`${addedBook.title} added`)
+
+      updateCache(
+        client.cache,
+        { query: ALL_BOOKS, variables: { genre: null } },
+        addedBook
+      )
+
+      client.cache.updateQuery({ query: ALL_GENRES }, ({ allGenres }) => {
+        const newGenres = addedBook.genres.filter(
+          (genre) => !allGenres.includes(genre)
+        )
+        return {
+          allGenres: allGenres.concat(newGenres),
+        }
+      })
+
+      client.cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
+        const authorExists = allAuthors.some(
+          (author) => author.name === addedBook.author.name
+        )
+
+        if (!authorExists) {
+          return {
+            allAuthors: allAuthors.concat({
+              id: addedBook.author.id,
+              name: addedBook.author.name,
+              born: addedBook.author.born,
+              bookCount: addedBook.author.bookCount,
+            }),
+          }
+        }
+        return {
+          allAuthors: allAuthors,
+        }
+      })
+    }
+  })
 
   useEffect(() => {
     const savedToken = localStorage.getItem('library-user-token')
@@ -53,11 +124,16 @@ const App = () => {
 
       <Notify errorMessage={errorMessage} />
 
-      <Authors show={page === 'authors'} setError={notify}/>
+      <Authors show={page === 'authors'} setError={notify} />
       <Books show={page === 'books'} />
-      <NewBook show={page === 'add'} setError={notify}/>
-      <Recommendations show={page === 'recommend'} token={token}/>
-      <LoginForm setToken={setToken} setPage={setPage} show={page === 'login'} setError={notify} />
+      <NewBook show={page === 'add'} setError={notify} />
+      <Recommendations show={page === 'recommend'} token={token} />
+      <LoginForm
+        setToken={setToken}
+        setPage={setPage}
+        show={page === 'login'}
+        setError={notify}
+      />
     </div>
   )
 }
