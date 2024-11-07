@@ -8,7 +8,7 @@ import Recommendations from './components/Recommendations'
 import Notify from './components/Notify'
 import { BOOK_ADDED, ALL_BOOKS, ALL_GENRES, ALL_AUTHORS } from './queries.js'
 
-export const updateCache = (cache, query, addedBook) => {
+export const updateCache = (cache, addedBook) => {
   // helper that is used to eliminate saving same book twice
   const uniqByName = (a) => {
     let seen = new Set()
@@ -18,19 +18,27 @@ export const updateCache = (cache, query, addedBook) => {
     })
   }
 
-  cache.updateQuery(query, ({ allBooks }) => {
-    return { allBooks: uniqByName(allBooks.concat(addedBook)) }
-  })
+  // all genres update
+  cache.updateQuery(
+    { query: ALL_BOOKS, variables: { genre: null } },
+    ({ allBooks }) => {
+      return { allBooks: uniqByName(allBooks.concat(addedBook)) }
+    }
+  )
 
+  // update the genre's own list in the cache only if it exists
   addedBook.genres.forEach((genre) => {
     cache.updateQuery({ query: ALL_BOOKS, variables: { genre } }, (data) => {
       if (data && data.allBooks) {
+        // if the genre's list is found in the cache, add the new book to it
         return {
           allBooks: uniqByName(data.allBooks.concat(addedBook)),
         }
-      }
-      return {
-        allBooks: [addedBook],
+      } else {
+        // if the genre's list is not yet in the cache, do nothing!
+        // when the genres list is fetched from the server (i.e. user clicks the genre and the list appears)
+        // THEN it is possible to update the cache if necessary.
+        return null
       }
     })
   })
@@ -47,11 +55,7 @@ const App = () => {
       const addedBook = data.data.bookAdded
       notify(`${addedBook.title} added`)
 
-      updateCache(
-        client.cache,
-        { query: ALL_BOOKS, variables: { genre: null } },
-        addedBook
-      )
+      updateCache(client.cache, addedBook)
 
       client.cache.updateQuery({ query: ALL_GENRES }, ({ allGenres }) => {
         const newGenres = addedBook.genres.filter(
@@ -81,7 +85,7 @@ const App = () => {
           allAuthors: allAuthors,
         }
       })
-    }
+    },
   })
 
   useEffect(() => {
